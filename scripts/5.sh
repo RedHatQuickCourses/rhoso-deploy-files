@@ -41,11 +41,12 @@ openstack server create \
     --flavor tiny --key-name default --network private --security-group basic \
     --image cirros test-server
 openstack floating ip create public
-
+sleep 3
 ip=$(openstack floating ip list -c "Floating IP Address" -f value)
 server=$(openstack server list -c  Name -f value | grep test)
-
+sleep 3
 openstack server add floating ip $server $ip
+sleep 3
 openstack server list
 exit
 ########## Copy-paste above commands in openstackclient pod's shell ##########
