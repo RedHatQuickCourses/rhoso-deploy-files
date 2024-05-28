@@ -1,5 +1,5 @@
 echo -e "Script #2: Run from hypervisor as root user"
-read -p "Press Enter to continue"
+read -p "Press Enter to continue" pause
 
 cd /var/lib/libvirt/images
 wget http://opentraining-na100.ole.redhat.com/downloads/images/rhel9-3.qcow2
