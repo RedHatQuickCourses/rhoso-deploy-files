@@ -17,9 +17,10 @@ spec:
   - kubernetes
 EOF
 
-while ! (oc get ns openshift-nmstate  -o custom-columns=Name:.metadata.name,Status:.status.phase | grep Active); do oc get ns openshift-nmstate; done
+while ! (oc get ns openshift-nmstate  -o custom-columns=Name:.metadata.name,Status:.status.phase | grep Active); do oc get ns openshift-nmstate; sleep 2; done
 oc get ns openshift-nmstate  -o custom-columns=Name:.metadata.name,Status:.status.phase
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
@@ -33,9 +34,10 @@ spec:
   - openshift-nmstate
 EOF
 
-while ! (oc get operatorgroup -n openshift-nmstate | grep openshift-nmstate); do sleep 1; done
+while ! (oc get operatorgroup -n openshift-nmstate | grep openshift-nmstate); do oc get operatorgroup -n openshift-nmstate; sleep 2; done
 oc get operatorgroup -n openshift-nmstate
 
+sleep 2
 cat << EOF| oc apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -52,9 +54,10 @@ spec:
   sourceNamespace: openshift-marketplace
 EOF
 
-while ! (oc get clusterserviceversion -n openshift-nmstate  -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep kubernetes-nmstate-operator | grep Succeeded); do oc get clusterserviceversion -n openshift-nmstate; done
+while ! (oc get clusterserviceversion -n openshift-nmstate  -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep kubernetes-nmstate-operator | grep Succeeded); do oc get clusterserviceversion -n openshift-nmstate; sleep 5; done
 oc get clusterserviceversion -n openshift-nmstate  -o custom-columns=Name:.metadata.name,Phase:.status.phase
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: nmstate.io/v1
 kind: NMState
@@ -67,6 +70,7 @@ oc get nmstates
 
 echo "Install metallb core prerequirements"
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: v1
 kind: Namespace
@@ -74,9 +78,10 @@ metadata:
   name: metallb-system
 EOF
 
-while ! (oc get ns metallb-system  -o custom-columns=Name:.metadata.name,Status:.status.phase | grep Active); do oc get ns metallb-system; done
+while ! (oc get ns metallb-system  -o custom-columns=Name:.metadata.name,Status:.status.phase | grep Active); do oc get ns metallb-system; sleep 2; done
 oc get ns metallb-system  -o custom-columns=Name:.metadata.name,Status:.status.phase
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
@@ -85,9 +90,10 @@ metadata:
   namespace: metallb-system
 EOF
 
-while ! (oc get operatorgroup -n metallb-system | grep metallb-operator); do oc get operatorgroup -n metallb-system; done
+while ! (oc get operatorgroup -n metallb-system | grep metallb-operator); do oc get operatorgroup -n metallb-system; sleep 2; done
 oc get operatorgroup -n metallb-system
 
+sleep 2
 cat << EOF| oc apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -102,9 +108,10 @@ spec:
 EOF
 
 oc get installplan -n metallb-system
-while ! (oc get clusterserviceversion -n metallb-system -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep metallb-operator | grep Succeeded); do oc get clusterserviceversion -n metallb-system; done
+while ! (oc get clusterserviceversion -n metallb-system -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep metallb-operator | grep Succeeded); do oc get clusterserviceversion -n metallb-system; sleep 5; done
 oc get clusterserviceversion -n metallb-system -o custom-columns=Name:.metadata.name,Phase:.status.phase
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: metallb.io/v1beta1
 kind: MetalLB
@@ -113,16 +120,17 @@ metadata:
   namespace: metallb-system
 EOF
 
-while ! (oc get deployment -n metallb-system controller -o custom-columns=Name:.metadata.name,Available:.status.conditions[0].type | grep Available); do oc get deployment -n metallb-system controller; done
+while ! (oc get deployment -n metallb-system controller -o custom-columns=Name:.metadata.name,Available:.status.conditions[0].type | grep Available); do oc get deployment -n metallb-system controller; sleep 5; done
 oc get deployment -n metallb-system controller -o custom-columns=Name:.metadata.name,Available:.status.conditions[0].type
 
 oc get daemonset -n metallb-system speaker
-while ! (oc get daemonset -n metallb-system speaker -o custom-columns=Name:.metadata.name,Available:.status.numberAvailable | grep 6); do oc get daemonset -n metallb-system speaker; done
+while ! (oc get daemonset -n metallb-system speaker -o custom-columns=Name:.metadata.name,Available:.status.numberAvailable | grep 6); do oc get daemonset -n metallb-system speaker; sleep 5; done
 oc get daemonset -n metallb-system speaker -o custom-columns=Name:.metadata.name,Available:.status.numberAvailable
 
 
 echo "Install cert manager core prerequirements"
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: v1
 kind: Namespace
@@ -133,9 +141,10 @@ metadata:
       security.openshift.io/scc.podSecurityLabelSync: "false"
 EOF
 
-while ! (oc get ns cert-manager-operator | grep Active); do oc get ns cert-manager-operator; done
+while ! (oc get ns cert-manager-operator | grep Active); do oc get ns cert-manager-operator; sleep 2; done
 oc get ns cert-manager-operator
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
@@ -148,9 +157,10 @@ spec:
   upgradeStrategy: Default
 EOF
 
-while ! (oc get operatorgroup -n cert-manager-operator | grep cert-manager-operator); do oc get operatorgroup -n cert-manager-operator; done
+while ! (oc get operatorgroup -n cert-manager-operator | grep cert-manager-operator); do oc get operatorgroup -n cert-manager-operator; sleep 2; done
 oc get operatorgroup -n cert-manager-operator
 
+sleep 2
 cat << EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -168,13 +178,13 @@ spec:
   startingCSV: cert-manager-operator.v1.12.1
 EOF
 
-while ! (oc get installplan -n cert-manager-operator -o yaml -o custom-columns=Name:.metadata.name,Approved:.spec.approved | grep true); do oc get installplan -n cert-manager-operator; done
+while ! (oc get installplan -n cert-manager-operator -o yaml -o custom-columns=Name:.metadata.name,Approved:.spec.approved | grep true); do oc get installplan -n cert-manager-operator; sleep 2; done
 oc get installplan -n cert-manager-operator -o yaml -o custom-columns=Name:.metadata.name,Approved:.spec.approved
 
-while ! (oc get clusterserviceversion -n cert-manager-operator -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep cert-manager-operator | grep Succeeded); do oc get clusterserviceversion -n cert-manager-operator; done
+while ! (oc get clusterserviceversion -n cert-manager-operator -o custom-columns=Name:.metadata.name,Phase:.status.phase | grep cert-manager-operator | grep Succeeded); do oc get clusterserviceversion -n cert-manager-operator; sleep 5; done
 oc get clusterserviceversion -n cert-manager-operator -o custom-columns=Name:.metadata.name,Phase:.status.phase
 
-while ! (oc get pods -n cert-manager | grep -w cert-manager | grep Running | wc -l | grep 3); do oc get pods -n cert-manager; done
+while ! (oc get pods -n cert-manager | grep -w cert-manager | grep Running | wc -l | grep 3); do oc get pods -n cert-manager; sleep 10; done
 oc get pods -n cert-manager
 
 oc new-project openstack-operators
@@ -193,17 +203,18 @@ oc apply -f osp-ng-nncp-m3.yaml
 while ! (oc get nncp | grep Available | wc -l | grep 6); do oc get nncp; done
 oc get nncp
 
+sleep 2
 oc apply -f osp-ng-netattach.yaml
 oc get network-attachment-definitions.k8s.cni.cncf.io -n openstack
-sleep 1
+sleep 2
 
 oc apply -f osp-ng-metal-lb-ip-address-pools.yaml
 oc get ipaddresspools.metallb.io -n metallb-system
-sleep 1
+sleep 2
 
 oc apply -f osp-ng-metal-lb-l2-advertisements.yaml
 oc get l2advertisements.metallb.io -n metallb-system
-sleep 1
+sleep 2
 
 read -p "Enter your Red Hat customer portal user ID: " rhnid
 read -sp "Enter your Red Hat customer portal user password: " rhnpasswd
@@ -230,13 +241,14 @@ oc apply -f osp-ng-openstack-operator.yaml
 oc get operators openstack-operator.openstack-operators
 oc get pods -n openstack-operators
 
-while ! (oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed | wc -l | grep 0); do sleep 5; done
-while ! (oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed | wc -l | grep 0); do sleep 5; done
+while ! (oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed | wc -l | grep 0); do oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed; sleep 5; done
+sleep 2
+while ! (oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed | wc -l | grep 0); do oc get pods -n openstack-operators | grep -v STATUS | grep -v Running | grep -v Completed; sleep 5; done
 
 oc get pods -n openstack-operators --sort-by=.metadata.creationTimestamp
 
 oc create -f osp-ng-ctlplane-secret.yaml
-sleep 1
+sleep 2
 oc describe secret osp-secret -n openstack
 
 echo -e "Setting up nfs storage..."
@@ -259,13 +271,16 @@ oc get pv | grep nfs
 oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
 oc create secret generic glance-cinder-config --from-file=glance-conf
 
+sleep 2
 oc create -f osp-ng-ctlplane-deploy.yaml
 
 while ! (oc get openstackcontrolplane -n openstack -o custom-columns=Name:.metadata.name,Status:.status.conditions[0].message | grep 'Setup complete'); do oc get openstackcontrolplane -n openstack; sleep 30; done
 oc get openstackcontrolplane -n openstack
 
+sleep 2
 oc apply -f osp-ng-dataplane-netconfig.yaml
 oc get netconfigs -n openstack
 
 echo -e "Next run script #2 on the hypervisor as root user"
 exit 0
+
